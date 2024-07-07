@@ -49,6 +49,30 @@
                     }
                 });
             });
+            $('input[name="published-date-sort"]').click(function () {
+                var facetValue = "";
+                var checkedIds = [];
+                $("input:checkbox[name=category-facet]:checked").each(function () {
+                    facetValue = facetValue + $(this).val() + ',';
+                    checkedIds.push($(this).attr("id"));
+                });
+                var order = $('input[name="published-date-sort"]:checked').val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/sitecore/News/NewsResult',
+                    data: { order: order, filter: facetValue },
+                    dataType: 'html',
+                    success: function (response) {
+                        //alert(response);
+                        $("#newsDiv").html(response);
+                        checkedIds.forEach(function (item) { $('#' + item).prop('checked', true); });
+                        $('#' + order).prop('checked', true);
+                        //$('#select option[value=' + order+']').prop('selected', true);
+                        console.log("data loaded successfully");
+                    }
+                });
+               
+            });
         });
     </script>
 </head>
@@ -69,11 +93,11 @@
             }
         </div>
         <div style="float:right">
-            <label for="sortBy">Sort By Publish Date:</label><br />
-            <select id="sortBy" name="sortBy">
-                <option value="Ascending">Ascending</option>
-                <option value="Descending">Descending</option>
-            </select>
+            <h6>Sort by Published Date:</h6>
+            <input type="radio" id="Ascending" name="published-date-sort" value="Ascending">
+            <label for="Ascending">Ascending</label><br>
+            <input type="radio" id="Descending" name="published-date-sort" value="Descending">
+            <label for="Descending">Descending</label><br>
         </div>
         <br />
         <div>
