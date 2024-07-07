@@ -1,0 +1,92 @@
+@using Sitecore.Mvc
+@using Sitecore.Mvc.Presentation
+@using System.Collections;
+@model Saibalini_test_sitecore.Models.NewsListWithFacet
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Items</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .news-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .news-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .news-description {
+            margin-top: 5px;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('input[type=checkbox]').change(function () {
+                var facetValue = "";
+                var checkedIds = [];
+                $("input:checkbox[name=category-facet]:checked").each(function () {
+                    facetValue = facetValue + $(this).val() + ',';
+                    checkedIds.push($(this).attr("id"));
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/sitecore/News/NewsResult',
+                    data: { order: "Ascending", filter: facetValue },
+                    dataType: 'html',
+                    success: function (response) {
+                        $("#newsDiv").html(response);
+                        checkedIds.forEach(function (item) { $('#' + item).prop('checked', true); });
+                        console.log("data loaded successfully");
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="newsDiv">
+        <h1>News Items</h1>
+        <div style="float:left">
+            @if (Model != null && Model.NewsFacets.Any())
+            {
+                foreach (var item in Model.NewsFacets)
+                {
+                    foreach (var dict in item)
+                    {
+                        <input type="checkbox" id="@dict.Key" value="@dict.Key" name="category-facet" />
+                        <label for="@dict.Key"> @dict.Key<span>(@dict.Value)</span> &nbsp; &nbsp; </label>
+                    }
+                }
+            }
+        </div>
+        <div style="float:right">
+            <label for="sortBy">Sort By Publish Date:</label><br />
+            <select id="sortBy" name="sortBy">
+                <option value="Ascending">Ascending</option>
+                <option value="Descending">Descending</option>
+            </select>
+        </div>
+        <br />
+        <div>
+            @if (Model != null && Model.NewsModels.Any())
+            {
+                foreach (var item in Model.NewsModels)
+                {
+                    <div class="news-item">
+                        <div class="news-title">@item.Title</div>
+                        <div class="news-description">@item.Description</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</body>
